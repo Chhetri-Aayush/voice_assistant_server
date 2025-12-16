@@ -1,12 +1,25 @@
 {
   "name": "voice_assistant",
   "scripts": {
-    "dev": "bun run --hot src/index.ts"
+    "dev": "bun run --hot src/index.ts",
+    "db:up": "sudo docker compose up -d",
+    "db:down": "sudo docker compose down",
+    "db:generate": "drizzle-kit generate --config=./drizzle.config.ts",
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "bun run ./src/db/seed.ts",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "hono": "^4.11.1"
+    "better-auth": "^1.4.7",
+    "drizzle-orm": "^0.45.1",
+    "drizzle-seed": "^0.3.1",
+    "hono": "^4.11.1",
+    "pg": "^8.16.3",
+    "zod": "^4.2.1"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/pg": "^8.16.0",
+    "drizzle-kit": "^0.31.8"
   }
 }
