@@ -1,6 +1,17 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  index,
+  serial,
+  varchar,
+  time,
+  date,
+} from "drizzle-orm/pg-core";
 
+// auth queries
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
@@ -91,3 +102,24 @@ export const accountRelations = relations(account, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+//booking queries
+
+// import {
+//   pgTable,
+//   serial,
+//   varchar,
+//   date,
+//   time,
+//   timestamp,
+// } from "drizzle-orm/pg-core";
+
+export const appointments = pgTable("appointments", {
+  id: serial("id").primaryKey(),
+
+  doctorName: varchar("doctor_name", { length: 255 }).notNull(),
+  patientName: varchar("patient_name", { length: 255 }).notNull(),
+  appointmentDate: varchar("appointment_date", { length: 20 }).notNull(),
+  appointmentTime: varchar("appointment_time", { length: 10 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});

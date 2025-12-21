@@ -8,6 +8,8 @@ const envSchema = z.object({
   DB_NAME: z.string(),
   BETTER_AUTH_SECRET: z.string(),
   BETTER_AUTH_URL: z.string(),
+  LLM_API_KEY: z.string(),
+  LLM_API_BASE_URL: z.string(),
 });
 
 const parsed = envSchema.safeParse(process.env);

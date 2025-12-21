@@ -8,6 +8,20 @@
       "when": 1765879544381,
       "tag": "0000_fixed_the_santerians",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1766142048469,
+      "tag": "0001_nice_paibok",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1766144108742,
+      "tag": "0002_icy_king_bedlam",
+      "breakpoints": true
     }
   ]
 }
