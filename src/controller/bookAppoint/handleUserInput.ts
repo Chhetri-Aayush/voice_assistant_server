@@ -1,5 +1,5 @@
 import { values } from "@/controller/bookAppoint/types";
-import { BookingContext } from "@/controller/bookAppoint/types";
+import type { BookingContext } from "@/controller/bookAppoint/types";
 import { dialogueEngine } from "@/controller/bookAppoint/dialogueManager";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
@@ -71,8 +71,7 @@ export async function handleUserInput(ctx: BookingContext) {
     // console.log(data);
     // console.log("we reaced ot the appointment booking poitn ");
     return {
-      reply:
-        "ठिक छ, मैले ३० डिसेम्बर २ बजे डाक्टर सिता संगको अपॉइंटमेन्ट रद्द गरें।",
+      reply: "ठिक छ, मैले ३० डिसेम्बर २ बजे डाक्टर सिता संगको अपॉइंटमेन्ट रद्द गरें।",
       // context,
     };
   }

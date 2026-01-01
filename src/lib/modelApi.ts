@@ -1,4 +1,4 @@
-import { env } from "./env";
+import { env } from "@/config/env";
 
 export const entitiesResponse = async (text: string) => {
   const res = await fetch(`${env.LLM_API_BASE_URL}/ner`, {
@@ -38,7 +38,7 @@ export const intentResponse = async (text: string) => {
   return res.json();
 };
 
-export const mt5Response = async (payload: any) => {
+export const mt5Response = async (payload: string) => {
   const res = await fetch(`${env.LLM_API_BASE_URL}/mt5_appointment`, {
     method: "POST",
     headers: {

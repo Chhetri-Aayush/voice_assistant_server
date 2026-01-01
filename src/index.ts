@@ -1,9 +1,10 @@
 import { Hono } from "hono";
-import { env } from "@/lib/env";
-import { auth } from "./lib/auth";
-import apiRoutes from "@/routes/index";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+
+import { env } from "@/config/env";
+import apiRoutes from "@/routes/index";
+import { auth } from "./lib/auth";
 
 const app = new Hono();
 

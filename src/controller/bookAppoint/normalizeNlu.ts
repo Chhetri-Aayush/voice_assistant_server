@@ -1,49 +1,33 @@
-import { BookingContext } from "./types";
-
-type IntentResponse = {
-  intResutl?: {
-    intent: string;
-    confidence: number;
-  };
-};
-
-type NerEntity = {
-  text: string;
-  label: string;
-  score: number;
-  start?: number;
-  end?: number;
-};
-
-type NerResponse = {
-  nerResult?: {
-    entities: NerEntity[];
-  };
-};
+import type {
+  BookingContext,
+  IntentResponse,
+  NerEntity,
+  NerResponse,
+} from "@/types/types";
 
 export function buildBookingContext(
-  intentRes: IntentResponse | null,
-  nerRes: NerResponse | null,
+  intentRes: IntentResponse,
+  nerRes: NerResponse,
 ): BookingContext {
-  const resIntent = intentRes.intent;
+  const intent = intentRes.intent;
   // console.log(` this is res intent: ${resIntent}`);
 
-  const entitiesPairs = nerRes.entities.map((entity: any) => ({
+  const entitiesPairs = nerRes.entities.map((entity: NerEntity) => ({
     text: entity.text,
     label: entity.label,
   }));
-
+  // console.log(`this is the nerRes :${JSON.stringify(nerRes)}`);
   // console.log(` this is entitiesPairs: ${JSON.stringify(entitiesPairs)}`);
 
   const ctx: BookingContext = {
-    intent: resIntent,
+    intent,
     TIME: null,
-    // DATE: null,
+    DATE: null,
     PERSON: null,
     DEPARTMENT: null,
   };
 
-  entitiesPairs.forEach((pair: any) => {
+  entitiesPairs?.forEach((pair: { text: string; label: string }) => {
     switch (pair.label) {
       case "PERSON":
         ctx.PERSON = pair.text;
@@ -54,9 +38,9 @@ export function buildBookingContext(
       case "DEPARTMENT":
         ctx.DEPARTMENT = pair.text;
         break;
-      // case "DATE":
-      //   ctx.DATE= pair.text;
-      //   break;
+      case "DATE":
+        ctx.DATE = pair.text;
+        break;
       default:
         break;
     }
