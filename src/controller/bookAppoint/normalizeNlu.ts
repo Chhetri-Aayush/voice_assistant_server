@@ -20,7 +20,7 @@ export function buildBookingContext(
   // console.log(` this is entitiesPairs: ${JSON.stringify(entitiesPairs)}`);
 
   const ctx: BookingContext = {
-    intent,
+    INTENT: intent,
     TIME: null,
     DATE: null,
     PERSON: null,

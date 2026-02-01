@@ -8,7 +8,7 @@ export type NLUResult = {
 };
 
 export type BookingContext = {
-  intent: string | null;
+  INTENT: string | null;
   TIME: string | null;
   DATE: string | null;
   PERSON: string | null;

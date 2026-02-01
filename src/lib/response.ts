@@ -41,15 +41,15 @@ export function askDepartmentResponse(): string {
 }
 
 export function askDoctorResponse(): string {
-const randomNum = Math.floor(Math.random() * 5) + 1;
+  const randomNum = Math.floor(Math.random() * 5) + 1;
 
-const responses: { [key: number]: string } = {
-  1: "कृपया कुन डाक्टरसँग अपोइन्टमेन्ट बुक गर्न चाहनुहुन्छ?",
-  2: "कृपया तपाईंको इच्छित डाक्टर बताउनुहोस्।",
-  3: "कृपया डाक्टर निर्धारण गर्नुहोस्।",
-  4: "कृपया डाक्टर चयन गर्नुहोस्।",
-  5: "कृपया उपयुक्त डाक्टर छान्नुहोस्।",
-};
+  const responses: { [key: number]: string } = {
+    1: "कृपया कुन डाक्टरसँग अपोइन्टमेन्ट बुक गर्न चाहनुहुन्छ?",
+    2: "कृपया तपाईंको इच्छित डाक्टर बताउनुहोस्।",
+    3: "कृपया डाक्टर निर्धारण गर्नुहोस्।",
+    4: "कृपया डाक्टर चयन गर्नुहोस्।",
+    5: "कृपया उपयुक्त डाक्टर छान्नुहोस्।",
+  };
 
-return responses[randomNum];
-} 
+  return responses[randomNum];
+}
