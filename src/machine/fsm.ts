@@ -27,8 +27,8 @@ export const dialogueMachine = setup({
   types: {
     context: {} as BookingContext & {
       lastQuery?: string;
-      missingSlots: string[];
-      systemMessages: string[];
+      missingSlots?: string[];
+      systemMessages?: string[];
     },
     events: {} as
       | { type: "INTENT_BOOKING"; data: Partial<BookingContext> }
@@ -97,27 +97,33 @@ export const dialogueMachine = setup({
           }),
           on: {
             UPDATE_FIELD: {
-              target: "checkingSlots",
               actions: assign(({ event, context }) => {
-                const updates: Partial<BookingContext> = {};
-                (Object.keys(event.data) as Array<keyof BookingContext>).forEach((key) => {
-                  if (event.data[key] !== null && event.data[key] !== undefined) {
-                    updates[key] = event.data[key];
-                  }
-                });
-                const updatedFields = {
-                  ...context,
-                  ...event.data,
-                };
+                const updatedContext = { ...context, ...event.data };
+                const newMissingSlots = calculateMissingSlots(updatedContext);
+                console.log("the prevous context is like :", context);
+                console.log(
+                  "the updated context is like we are in the updated field state and it is :",
+                  updatedContext,
+                  newMissingSlots,
+                );
+
                 return {
-                  ...updatedFields,
-                  missingSlots: calculateMissingSlots(updatedFields),
+                  ...updatedContext,
+                  missingSlots: newMissingSlots,
                 };
               }),
+              target: "checkingSlots",
             },
           },
         },
-        confirmBooking: { type: "final" },
+        confirmBooking: {
+          type: "final",
+          entry: assign({
+            systemMessages: () => [
+              "तपाईंको अपोइन्टमेन्ट सफलतापूर्वक बुक गरिएको छ। धन्यवाद!",
+            ],
+          }),
+        },
       },
     },
 
@@ -127,6 +133,7 @@ export const dialogueMachine = setup({
         askReason: {},
       },
     },
+
     // INTENT_FAQ: {},
   },
 });
