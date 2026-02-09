@@ -22,6 +22,20 @@
       "when": 1766144108742,
       "tag": "0002_icy_king_bedlam",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1770310970910,
+      "tag": "0003_brainy_peter_parker",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1770338714973,
+      "tag": "0004_curious_maverick",
+      "breakpoints": true
     }
   ]
 }

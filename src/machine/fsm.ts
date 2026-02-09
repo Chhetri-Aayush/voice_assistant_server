@@ -18,7 +18,7 @@
 //   },
 // });
 
-import { createMachine, assign, setup } from "xstate";
+import { createMachine, assign, setup, fromPromise } from "xstate";
 import { BookingContext } from "@/types/types";
 import { calculateMissingSlots } from "@/lib/missingFields";
 import { generateMissingFieldMessages } from "@/lib/missingFields";
@@ -35,6 +35,12 @@ export const dialogueMachine = setup({
       | { type: "INTENT_CANCEL" }
       | { type: "UPDATE_FIELD"; data: Partial<BookingContext> },
     // | { type: "INTENT_FAQ"; query: string },
+  },
+  actors: {
+    createBooking: fromPromise(async ({ input }) => {
+      // return await createAppointment(input);
+      console.log("appending to the database tho ");
+    }),
   },
 }).createMachine({
   id: "dialogueSystem",
@@ -116,6 +122,7 @@ export const dialogueMachine = setup({
             },
           },
         },
+
         confirmBooking: {
           type: "final",
           entry: assign({
@@ -124,14 +131,59 @@ export const dialogueMachine = setup({
             ],
           }),
         },
+
+        // confirmBooking: {
+        //   invoke: {
+        //     src: "createBooking",
+        //     input: ({ context }) => context,
+
+        //     onDone: {
+        //       target: "bookingSuccess",
+        //     },
+
+        //     onError: {
+        //       target: "bookingFailed",
+        //     },
+        //   },
+        // },
+        // bookingSuccess: {
+        //   type: "final",
+        //   entry: assign({
+        //     systemMessages: () => [
+        //       "तपाईंको अपोइन्टमेन्ट सफलतापूर्वक बुक गरिएको छ। धन्यवाद!",
+        //     ],
+        //   }),
+        // },
+
+        // bookingFailed: {
+        //   entry: assign({
+        //     systemMessages: () => [
+        //       "अपोइन्टमेन्ट बुक गर्दा केही समस्या भएको छ, फेरि प्रयास गर्नुहोस्।",
+        //     ],
+        //   }),
+        // },
+
+        // confirmBooking: {
+        //   type: "final",
+        //   entry: assign({
+        //     systemMessages: () => [
+        //       "तपाईंको अपोइन्टमेन्ट सफलतापूर्वक बुक गरिएको छ। धन्यवाद!",
+        //     ],
+        //   }),
+        // },
       },
     },
 
     cancelAppointment: {
       initial: "askReason",
-      states: {
-        askReason: {},
-      },
+      entry: assign({
+        systemMessages: () => [
+          "तपाईंको अपोइन्टमेन्ट सफलतापूर्वक रद्द गरिएको छ।",
+        ],
+      }),
+      // states: {
+      //   askReason: {},
+      // },
     },
 
     // INTENT_FAQ: {},

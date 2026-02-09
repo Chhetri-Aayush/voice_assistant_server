@@ -203,10 +203,10 @@ export const accountRelations = relations(account, ({ one }) => ({
 //   createdAt: timestamp("created_at").defaultNow(),
 // });
 
-export const appointments = pgTable("appointments", {
-  id: serial("id").primaryKey(),
-  date: text("date").notNull(),
-  time: time("time").notNull(),
-  department: varchar("department", { length: 100 }).notNull(),
-  doctor: varchar("doctor", { length: 150 }).notNull(),
-});
+// export const appointments = pgTable("appointments", {
+//   id: serial("id").primaryKey(),
+//   date: text("date").notNull(),
+//   time: time("time").notNull(),
+//   department: varchar("department", { length: 100 }).notNull(),
+//   doctor: varchar("doctor", { length: 150 }).notNull(),
+// });
