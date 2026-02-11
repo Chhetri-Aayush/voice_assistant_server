@@ -4,42 +4,8 @@ import type { Context } from "hono";
 import { Actor, createActor } from "xstate";
 import { dialogueMachine } from "@/machine/fsm";
 import { upgradeWebSocket } from "hono/bun";
-import { mac } from "zod";
 
-// export const appointmentController = async (c: Context) => {
-// const { text } = await c.req.json();
-
-// const nerResponse = await entitiesResponse(text);
-// const intResponse = await intentResponse(text);
-
-// console.log(nerResponse);
-// console.log("anohter line");
-// console.log(intResponse);
-
-// const normalizedCtx = buildBookingContext(intResponse, nerResponse);
-// console.log(normalizedCtx);
-
-// const actor = createActor(dialogueMachine);
-// actor.start();
-
-// if (intResponse.intent === "BookAppointment") {
-//   actor.send({ type: "INTENT_BOOKING", data: normalizedCtx });
-// } else if (intResponse.intent === "CancelAppointment") {
-//   actor.send({ type: "INTENT_CANCEL", data: normalizedCtx });
-// }
-// else if (intResponse.intent === "faq") {
-//   actor.send({ type: "INTENT_FAQ", query: text });
-// }
-
-// const snapshot = actor.getSnapshot();
-
-// let chatResponse = "";
-// const answer = await handleUserInput(ctx);
-// console.log(answer);
-// return c.json({ nerResponse, intResponse, normalizedCtx });
-// };
-
-export const appointmentController = upgradeWebSocket((c) => {
+export const appointmentController = upgradeWebSocket((c: Context) => {
   let actor: any;
   return {
     onOpen: (_, ws) => {
@@ -101,6 +67,10 @@ export const appointmentController = upgradeWebSocket((c) => {
 
       const normalizedCtx = buildBookingContext(intResponse, nerResponse);
 
+      //TODO: based on the intResponse we have to create different normalizedCtx one is when there is booking appoitnemnt and rest is like for the faq or the canacle where we dont
+      //  have to have the normalized ctx so that the we dont pass any unnecessary data to the fsm
+      //
+
       console.log("Normalized Context:", normalizedCtx);
       console.log({ nerResponse, intResponse });
 
@@ -156,15 +126,6 @@ export const appointmentController = upgradeWebSocket((c) => {
       console.log(
         "we are out of the on message of the socket and we run out of it tho ",
       );
-      // const machineState = actor.getSnapshot();
-      // let response = "";
-      // if (machineState.matches("bookingAppointment.askMissingField")) {
-      // response = machineState.context.systemMessages.slice(-1)[0];
-      // response = machineState.context.systemMessages;
-      // }
-
-      // console.log("Machine State:", response);
-      // ws.send("Got your message");
     },
     onClose: () => {
       console.log("Closed");

@@ -1,23 +1,3 @@
-// import { createMachine, setup } from "xstate";
-
-// const dialogueMachine = setup({
-//   types: {
-//     context: {} as { },
-//     events: {} as { type: "booking" },
-//   },
-//   actions: {},
-//   actors: {},
-//   guards: {},
-// }).createMachine({
-//   initial: "idle",
-//   context: { name: "ram" },
-//   states: {
-//     sate1: {},
-//     sate2: {},
-//     state3: {},
-//   },
-// });
-
 import { createMachine, assign, setup, fromPromise } from "xstate";
 import { BookingContext } from "@/types/types";
 import { calculateMissingSlots } from "@/lib/missingFields";

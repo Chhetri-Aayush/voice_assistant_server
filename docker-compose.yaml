@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres
+    image: pgvector/pgvector:0.8.1-pg18-trixie
     container_name: voice-container
     ports:
       - "5432:5432"

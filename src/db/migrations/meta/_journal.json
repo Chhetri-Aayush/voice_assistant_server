@@ -36,6 +36,13 @@
       "when": 1770338714973,
       "tag": "0004_curious_maverick",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1770822724461,
+      "tag": "0005_robust_psynapse",
+      "breakpoints": true
     }
   ]
 }
