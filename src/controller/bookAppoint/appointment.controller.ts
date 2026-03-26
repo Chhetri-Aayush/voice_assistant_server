@@ -4,11 +4,21 @@ import type { Context } from "hono";
 import { Actor, createActor } from "xstate";
 import { dialogueMachine } from "@/machine/fsm";
 import { upgradeWebSocket } from "hono/bun";
+import { auth } from "@/lib/auth";
 
 export const appointmentController = upgradeWebSocket((c: Context) => {
   let actor: any;
+  let id: any;
   return {
-    onOpen: (_, ws) => {
+    onOpen: async (_, ws) => {
+      const session = await auth.api.getSession({
+        headers: c.req.raw.headers,
+      });
+      if (!session) {
+        ws.close(1008, "Unauthorized");
+        return;
+      }
+      id = session.user.id;
       actor = createActor(dialogueMachine);
       ws.send(
         JSON.stringify({
@@ -18,61 +28,40 @@ export const appointmentController = upgradeWebSocket((c: Context) => {
       );
       actor.start();
       actor.subscribe((state: any) => {
-        // console.log("1-------------------------->");
-        console.log(
-          "we are in the subscribe of the fsm this will only trigger when the state chantes",
-        );
-        console.log("FSM State changed:", state.value);
-        console.log("FSM Context:", state.context);
-        // console.log("fsm state is : ", state);
-        // console.log(
-        //   "this is the sate nowdeestate.StateNode:",
-        //   state._nodes.StateNode,
-        // );
-        console.log("response is :", state.context.systemMessages[0]);
+        const message = state.context.systemMessages[0];
+
+        const isQuietState =
+          state.matches("bookingAppointment.confirmingWithDatabase") ||
+          state.matches("cancelAppointment.executing");
+
+        if (isQuietState) {
+          console.log("finally this triggered ooooollalalalaa");
+          return;
+        }
+
         ws.send(
           JSON.stringify({
             role: "assistant",
             content: state.context.systemMessages[0] || "फेरि भन्नुहोस् न",
           }),
         );
-
-        // if (state.matches("bookingAppointment.askMissingField")) {
-        //   console.log("we are here");
-        //   const response = state.context.systemMessages;
-        //   console.log("Sending response:", response);
-        // ws.send(JSON.stringify({ response }));
-        // }
-
-        console.log(
-          "we are in the subscribe of the fsm this will only trigger when the state chantes this will stop here tho",
-        );
-        // console.log("<2--------------------------->");
       });
-      // console.log("WebSocket opened");
-      // ws.send("Hello from server");
     },
     onMessage: async (event, ws) => {
-      // console.log("hye iam in OnMessage in the socket");
-
-      // console.log("<3--------------------------->");
-      console.log(
-        "we are in the on message of the socket of the fsm this will trigger when the message comes every time ",
-      );
       const text = event.data;
       const data = JSON.parse(text as string);
 
       const nerResponse = await entitiesResponse(data.content);
       const intResponse = await intentResponse(data.content);
 
-      const normalizedCtx = buildBookingContext(intResponse, nerResponse);
+      const normalizedCtx = buildBookingContext(intResponse, nerResponse, id);
 
       //TODO: based on the intResponse we have to create different normalizedCtx one is when there is booking appoitnemnt and rest is like for the faq or the canacle where we dont
       //  have to have the normalized ctx so that the we dont pass any unnecessary data to the fsm
       //
 
       console.log("Normalized Context:", normalizedCtx);
-      console.log({ nerResponse, intResponse });
+      // console.log({ nerResponse, intResponse });
 
       //after the context is built we dont send it direclty to the state machine first we validate the bookign context like if the department the user has sent is
       // valid or not or if the date the user has sent is valid or not or the time the user has sent is valid or not
@@ -81,14 +70,7 @@ export const appointmentController = upgradeWebSocket((c: Context) => {
       const currentState = actor.getSnapshot();
       const currentStateValue = currentState.value;
 
-      // console.log("we are in the state :", currentStateValue);
-      console.log(
-        "the state that we are in is ahile kosate is ",
-        currentStateValue,
-      );
-
       if (currentStateValue === "idle") {
-        // console.log("we are in teh current state one ");
         if (normalizedCtx.INTENT === "BookAppointment") {
           actor.send({ type: "INTENT_BOOKING", data: normalizedCtx });
         } else if (normalizedCtx.INTENT === "CancelAppointment") {
@@ -100,32 +82,9 @@ export const appointmentController = upgradeWebSocket((c: Context) => {
             ([key, value]) => key !== "INTENT" && value !== null,
           ),
         );
-
-        console.log(
-          "this is the new filteredNormalized Ctx:",
-          filteredNormalizedCtx,
-        );
-        actor.send({ type: "UPDATE_FIELD", data: filteredNormalizedCtx });
-        console.log("this is the data that we will send)");
-        console.log("update data :", filteredNormalizedCtx);
-
-        // console.log("<4------------------------->");
-        // if (
-        //   normalizedCtx.INTENT === "BookAppointment" ||
-        //   normalizedCtx.INTENT === "CancelAppointment"
-        // ) {
-        //   if (intent.intent === "BookAppointment") {
-        //     actor.send({ type: "INTENT_BOOKING", data: normalizedCtx });
-        //   } else {
-        //     actor.send({ type: "INTENT_CANCEL", data: normalizedCtx });
-        //   }
-        // } else {
-        //   actor.send({ type: "UPDATE_CONTEXT", data: normalizedCtx });
-        // }
+        (console.log("the filtered normalized ctx is ", filteredNormalizedCtx),
+          actor.send({ type: "UPDATE_FIELD", data: filteredNormalizedCtx }));
       }
-      console.log(
-        "we are out of the on message of the socket and we run out of it tho ",
-      );
     },
     onClose: () => {
       console.log("Closed");

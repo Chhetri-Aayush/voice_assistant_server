@@ -1,3 +1,6 @@
+import type { InferSelectModel, InferInsertModel } from "drizzle-orm";
+import { auth } from "../lib/auth";
+
 export type NLUResult = {
   intent: string;
   entities: Partial<{
@@ -8,6 +11,7 @@ export type NLUResult = {
 };
 
 export type BookingContext = {
+  ID: any | null;
   INTENT: string | null;
   TIME: string | null;
   DATE: string | null;
@@ -30,4 +34,11 @@ export type NerEntity = {
 
 export type NerResponse = {
   entities: NerEntity[];
+};
+
+export type HonoEnv = {
+  Variables: {
+    user: typeof auth.$Infer.Session.user;
+    session: typeof auth.$Infer.Session.session;
+  };
 };

@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { appointmentController } from "@/controller/bookAppoint/appointment.controller";
+import { bookedAppointmentController } from "@/controller/bookedAppoint/bookedAppointment.controller";
 import { testController } from "@/controller/test/testController";
 import { socketController } from "@/controller/socket/socket.controller";
 
@@ -10,6 +11,7 @@ v1Routes.get("/hello", (c) => {
 });
 
 v1Routes.get("/appointment", appointmentController);
+v1Routes.get("/bookedAppointments", bookedAppointmentController);
 v1Routes.get("/testing", testController);
 v1Routes.get("/testSocket", socketController);
 

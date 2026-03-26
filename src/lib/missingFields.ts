@@ -6,12 +6,12 @@ import {
   askDoctorResponse,
 } from "./response";
 
-export function calculateMissingSlots(
-  context: Partial<BookingContext>,
-): string[] {
-  const required = ["DATE", "TIME", "DEPARTMENT", "PERSON"];
-  return required.filter((field) => !context[field as keyof BookingContext]);
-}
+// export function calculateMissingSlots(
+//   context: Partial<BookingContext>,
+// ): string[] {
+//   const required = ["DATE", "TIME", "DEPARTMENT", "PERSON"];
+//   return required.filter((field) => !context[field as keyof BookingContext]);
+// }
 
 export function generateMissingFieldMessages(slotName: string): string {
   let message: string;
@@ -31,5 +31,18 @@ export function generateMissingFieldMessages(slotName: string): string {
     default:
       message = "";
   }
+
   return message;
+}
+
+export function calculateMissingSlots(
+  context: Partial<BookingContext>,
+): string[] {
+  const required = ["DATE", "TIME", "DEPARTMENT", "PERSON"];
+
+  return required.filter((field) => {
+    const value = context[field as keyof BookingContext];
+
+    return value === undefined || value === null || String(value).trim() === "";
+  });
 }

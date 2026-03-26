@@ -43,6 +43,34 @@
       "when": 1770822724461,
       "tag": "0005_robust_psynapse",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1774450349407,
+      "tag": "0006_early_jack_murdock",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1774450991624,
+      "tag": "0007_old_micromacro",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1774460805286,
+      "tag": "0008_lumpy_talkback",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1774462044277,
+      "tag": "0009_wide_menace",
+      "breakpoints": true
     }
   ]
 }

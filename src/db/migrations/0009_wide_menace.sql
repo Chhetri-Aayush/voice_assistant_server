@@ -1,0 +1,1 @@
+ALTER TABLE "appointments" DROP CONSTRAINT "appointments_time_slot_id_unique";

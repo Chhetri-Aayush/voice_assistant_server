@@ -1,4 +1,5 @@
 import { env } from "@/config/env";
+import { error } from "better-auth/api";
 
 export const entitiesResponse = async (text: string) => {
   const res = await fetch(`${env.LLM_API_BASE_URL}/ner`, {
@@ -11,13 +12,32 @@ export const entitiesResponse = async (text: string) => {
   });
 
   if (!res.ok) {
-    throw new Error(
-      `There is some error in the mbert for the entities extraction `,
-    );
+    const errorText = await res.text(); // or res.json()
+    console.error("API Error:", errorText);
+
+    throw new Error(`NER API Error: ${errorText}`);
   }
 
   return res.json();
 };
+// export const entitiesResponse = async (text: string) => {
+//   const res = await fetch(`${env.LLM_API_BASE_URL}/ner`, {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       "X-API-Key": env.LLM_API_KEY,
+//     },
+//     body: JSON.stringify({ text }),
+//   });
+
+//   if (!res.ok) {
+//     throw new Error(
+//       `There is some error in the mbert for the entities extraction `,
+//     );
+//   }
+
+//   return res.json();
+// };
 
 export const intentResponse = async (text: string) => {
   const res = await fetch(`${env.LLM_API_BASE_URL}/intent`, {

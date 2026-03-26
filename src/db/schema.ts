@@ -117,9 +117,10 @@ export const departments = pgTable("departments", {
 
 export const doctors = pgTable("doctors", {
   id: serial("id").primaryKey(),
-  userId: text("user_id")
-    .references(() => user.id)
-    .notNull(),
+  name: varchar("name", { length: 100 }).notNull(),
+  // userId: text("user_id")
+  //   .references(() => user.id)
+  //   .notNull(),
   departmentId: integer("department_id")
     .references(() => departments.id)
     .notNull(),
@@ -155,17 +156,6 @@ export const timeSlots = pgTable("time_slots", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// export const patients = pgTable("patients", {
-//   id: serial("id").primaryKey(),
-//   userId: text("user_id")
-//     .references(() => user.id)
-//     .notNull()
-//     .unique(),
-//   contactNumber: varchar("contact_number", { length: 20 }),
-//   createdAt: timestamp("created_at").defaultNow(),
-//   updatedAt: timestamp("updated_at").defaultNow(),
-// });
-
 export const appointments = pgTable("appointments", {
   id: serial("id").primaryKey(),
   userId: text("user_id")
@@ -179,8 +169,8 @@ export const appointments = pgTable("appointments", {
     .notNull(),
   timeSlotId: integer("time_slot_id")
     .references(() => timeSlots.id)
-    .notNull()
-    .unique(),
+    .notNull(),
+  // .unique(),
   appointmentDate: date("appointment_date"),
   appointmentTime: time("appointment_time"),
   status: varchar("status", { length: 20 }).default("booked"),
@@ -198,15 +188,15 @@ export const cancellations = pgTable("cancellations", {
   cancelledBy: text("cancelled_by")
     .references(() => user.id)
     .notNull(),
-  reason: varchar("reason", { length: 50 }),
-  refundStatus: varchar("refund_status", { length: 20 }).default("pending"),
+  // reason: varchar("reason", { length: 50 }),
+  // refundStatus: varchar("refund_status", { length: 20 }).default("pending"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
-  doctorProfile: many(doctors),
+  // doctorProfile: many(doctors),
   appointments: many(appointments),
   cancellations: many(cancellations),
 }));
@@ -231,10 +221,10 @@ export const departmentRelations = relations(departments, ({ many }) => ({
 }));
 
 export const doctorRelations = relations(doctors, ({ one, many }) => ({
-  user: one(user, {
-    fields: [doctors.userId],
-    references: [user.id],
-  }),
+  // user: one(user, {
+  //   fields: [doctors.userId],
+  //   references: [user.id],
+  // }),
   department: one(departments, {
     fields: [doctors.departmentId],
     references: [departments.id],
