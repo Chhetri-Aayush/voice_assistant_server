@@ -10,6 +10,7 @@ import {
   integer,
   time,
   date,
+  vector,
 } from "drizzle-orm/pg-core";
 
 // auth queries
@@ -288,3 +289,9 @@ export const cancellationRelations = relations(cancellations, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+export const faqChunks = pgTable("faq_chunks", {
+  id: serial("id").primaryKey(),
+  chunkText: text("chunk_text").notNull(),
+  embedding: vector("embedding", { dimensions: 768 }).notNull(),
+});

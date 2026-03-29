@@ -4,6 +4,7 @@ import type {
   NerEntity,
   NerResponse,
 } from "@/types/types";
+import { parseNepaliTime, resolveNepaliDateToEnglish } from "@/lib/response";
 
 export function buildBookingContext(
   intentRes: IntentResponse,
@@ -11,13 +12,13 @@ export function buildBookingContext(
   id: any,
 ): BookingContext {
   const intent = intentRes.intent;
-  // console.log(` this is res intent: ${resIntent}`);
+  console.log(` this is res intent: ${JSON.stringify(intentRes)}`);
 
   const entitiesPairs = nerRes.entities.map((entity: NerEntity) => ({
     text: entity.text,
     label: entity.label,
   }));
-  // console.log(`this is the nerRes :${JSON.stringify(nerRes)}`);
+  console.log(`this is the nerRes :${JSON.stringify(nerRes)}`);
   // console.log(` this is entitiesPairs: ${JSON.stringify(entitiesPairs)}`);
 
   const ctx: BookingContext = {
@@ -32,30 +33,28 @@ export function buildBookingContext(
   entitiesPairs?.forEach((pair: { text: string; label: string }) => {
     switch (pair.label) {
       case "PERSON":
-        const doctorPrefixes = /(डॉक्टर|डाक्टर)\s*/g;
+        const doctorPrefixes = /(डॉक्टर|डाक्टर|डक्टर )\s*/g;
         ctx.PERSON = pair.text.replace(doctorPrefixes, "").trim();
         break;
 
       // ctx.PERSON = pair.text;
       // break;
       case "TIME":
-        if (pair.text.includes("बिहान एघार बजे")) {
-          ctx.TIME = "11:00:00";
+        const parsedTime = parseNepaliTime(pair.text);
+
+        if (parsedTime) {
+          ctx.TIME = `${parsedTime}:00`;
         } else {
           ctx.TIME = null;
         }
-        // ctx.TIME = pair.text;
         break;
+      // ctx.TIME = pair.text;
       case "DEPARTMENT":
         ctx.DEPARTMENT = pair.text;
         break;
       case "DATE":
-        if (pair.text.includes("पन्ध्र गते")) {
-          ctx.DATE = "2026-03-29";
-        } else {
-          ctx.DATE = null;
-        }
-        // ctx.DATE = pair.text;
+        const result = resolveNepaliDateToEnglish(pair.text);
+        ctx.DATE = result.englishDate;
         break;
       default:
         break;

@@ -10,6 +10,8 @@ const envSchema = z.object({
   BETTER_AUTH_URL: z.string(),
   LLM_API_KEY: z.string(),
   LLM_API_BASE_URL: z.string(),
+  REDIS_HOST: z.string().default("127.0.0.1"),
+  REDIS_PORT: z.coerce.number().default(6379),
 });
 
 const parsed = envSchema.safeParse(process.env);

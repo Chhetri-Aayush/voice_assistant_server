@@ -1,25 +1,31 @@
+// controller/appointmentController.ts
 import { buildBookingContext } from "@/controller/bookAppoint/normalizeNlu";
+import { buildRescheduleContext } from "./normalizeReschudle";
 import { entitiesResponse, intentResponse } from "@/lib/modelApi";
 import type { Context } from "hono";
-import { Actor, createActor } from "xstate";
+import { createActor } from "xstate";
 import { dialogueMachine } from "@/machine/fsm";
 import { upgradeWebSocket } from "hono/bun";
 import { auth } from "@/lib/auth";
 
 export const appointmentController = upgradeWebSocket((c: Context) => {
   let actor: any;
-  let id: any;
+  let id: string;
+
   return {
     onOpen: async (_, ws) => {
       const session = await auth.api.getSession({
         headers: c.req.raw.headers,
       });
+
       if (!session) {
         ws.close(1008, "Unauthorized");
         return;
       }
+
       id = session.user.id;
       actor = createActor(dialogueMachine);
+
       ws.send(
         JSON.stringify({
           role: "assistant",
@@ -28,66 +34,139 @@ export const appointmentController = upgradeWebSocket((c: Context) => {
       );
       actor.start();
       actor.subscribe((state: any) => {
-        const message = state.context.systemMessages[0];
-
+        // const isQuietState =
+        //   state.matches("bookingAppointment.confirmingWithDatabase") ||
+        //   state.matches("cancelAppointment.executing") ||
+        //   state.matches("rescheduleAppointment.executing");
         const isQuietState =
           state.matches("bookingAppointment.confirmingWithDatabase") ||
-          state.matches("cancelAppointment.executing");
+          state.matches("cancelAppointment.executing") ||
+          state.matches("rescheduleAppointment.executing") ||
+          state.matches({ faq: "answering" }) ||
+          state.matches({ faq: "done" }) ||
+          state.matches({ faq: "failed" });
 
-        if (isQuietState) {
-          console.log("finally this triggered ooooollalalalaa");
-          return;
-        }
+        if (isQuietState) return;
+
+        const message = state.context.systemMessages[0];
 
         ws.send(
           JSON.stringify({
             role: "assistant",
-            content: state.context.systemMessages[0] || "फेरि भन्नुहोस् न",
+            content: message ?? "फेरि भन्नुहोस् न",
           }),
         );
       });
     },
+
     onMessage: async (event, ws) => {
-      const text = event.data;
-      const data = JSON.parse(text as string);
+      try {
+        const data = JSON.parse(event.data as string);
 
-      const nerResponse = await entitiesResponse(data.content);
-      const intResponse = await intentResponse(data.content);
+        const [nerResponse, intResponse] = await Promise.all([
+          entitiesResponse(data.content),
+          intentResponse(data.content),
+        ]);
+        let normalizedCtx;
 
-      const normalizedCtx = buildBookingContext(intResponse, nerResponse, id);
-
-      //TODO: based on the intResponse we have to create different normalizedCtx one is when there is booking appoitnemnt and rest is like for the faq or the canacle where we dont
-      //  have to have the normalized ctx so that the we dont pass any unnecessary data to the fsm
-      //
-
-      console.log("Normalized Context:", normalizedCtx);
-      // console.log({ nerResponse, intResponse });
-
-      //after the context is built we dont send it direclty to the state machine first we validate the bookign context like if the department the user has sent is
-      // valid or not or if the date the user has sent is valid or not or the time the user has sent is valid or not
-      //something like this ....if(!validationcontext(context)) then send some response to the client
-
-      const currentState = actor.getSnapshot();
-      const currentStateValue = currentState.value;
-
-      if (currentStateValue === "idle") {
-        if (normalizedCtx.INTENT === "BookAppointment") {
-          actor.send({ type: "INTENT_BOOKING", data: normalizedCtx });
-        } else if (normalizedCtx.INTENT === "CancelAppointment") {
-          actor.send({ type: "INTENT_CANCEL", data: normalizedCtx });
+        if (intResponse.intent === "RescheduleAppointment") {
+          normalizedCtx = buildRescheduleContext(intResponse, nerResponse, id);
+        } else {
+          normalizedCtx = buildBookingContext(intResponse, nerResponse, id);
         }
-      } else {
-        const filteredNormalizedCtx = Object.fromEntries(
-          Object.entries(normalizedCtx).filter(
-            ([key, value]) => key !== "INTENT" && value !== null,
-          ),
+
+        console.log(
+          "the normalized ctx before sendign to the fsm is ",
+          normalizedCtx,
         );
-        (console.log("the filtered normalized ctx is ", filteredNormalizedCtx),
-          actor.send({ type: "UPDATE_FIELD", data: filteredNormalizedCtx }));
+        console.log("<-------------------->");
+
+        const snapshot = actor.getSnapshot();
+        console.log(
+          "this is the snapshot right before we ennter the fsm ",
+          snapshot.value,
+        );
+        console.log("<-------------------->");
+        const intent = normalizedCtx.INTENT;
+
+        if (snapshot.matches("idle")) {
+          if (intent === "BookAppointment") {
+            actor.send({ type: "INTENT_BOOKING", data: normalizedCtx });
+          } else if (intent === "CancelAppointment") {
+            actor.send({ type: "INTENT_CANCEL", data: normalizedCtx });
+          } else if (intent === "RescheduleAppointment") {
+            actor.send({ type: "RESCHEDULE_APPOINTMENT", data: normalizedCtx });
+          } else {
+            actor.send({ type: "INTENT_FAQ", query: data.content });
+          }
+          return;
+        }
+
+        if (
+          snapshot.matches({ bookingAppointment: "askMissingSlots" }) ||
+          snapshot.matches({ bookingAppointment: "bookingFailed" })
+        ) {
+          if (intent === "FAQ") {
+            actor.send({ type: "INTENT_FAQ", query: data.content });
+            return;
+          }
+          if (intent === "CancelAppointment") {
+            actor.send({ type: "INTENT_CANCEL", data: normalizedCtx });
+            return;
+          }
+          const fields = Object.fromEntries(
+            Object.entries(normalizedCtx).filter(
+              ([key, value]) => key !== "INTENT" && value !== null,
+            ),
+          );
+          if (Object.keys(fields).length > 0) {
+            actor.send({ type: "UPDATE_FIELD", data: fields });
+          } else {
+            actor.send({ type: "INTENT_FAQ", query: data.content });
+          }
+          return;
+        }
+        if (snapshot.matches("faq")) {
+          if (intent === "BookAppointment") {
+            actor.send({ type: "INTENT_BOOKING", data: normalizedCtx });
+            return;
+          }
+
+          if (intent === "CancelAppointment") {
+            actor.send({ type: "INTENT_CANCEL", data: normalizedCtx });
+            return;
+          }
+
+          actor.send({ type: "INTENT_FAQ", query: data.content });
+          return;
+        }
+
+        if (snapshot.matches("cancelAppointment.failed")) {
+          if (intent === "CancelAppointment") {
+            actor.send({ type: "INTENT_CANCEL", data: normalizedCtx });
+          }
+          return;
+        }
+      } catch (err) {
+        console.error("onMessage error:", err);
+
+        ws.send(
+          JSON.stringify({
+            role: "assistant",
+            content: "माफ गर्नुहोस्, केही समस्या भयो। फेरि प्रयास गर्नुहोस्।",
+          }),
+        );
       }
+      const snapshot = actor.getSnapshot();
+      console.log(
+        "this is the snapshot right after we leave the fsm ",
+        snapshot.value,
+      );
+      console.log("<-------------------->");
     },
+
     onClose: () => {
-      console.log("Closed");
+      console.log(`WebSocket closed for user: ${id}`);
     },
   };
 });

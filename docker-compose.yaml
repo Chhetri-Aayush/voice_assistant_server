@@ -11,6 +11,13 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
 
+  redis:
+    image: redis:8-trixie
+    container_name: voice-redis
+    ports:
+      - "6379:6379"
+    restart: always
+
   adminer:
     image: adminer
     restart: always
