@@ -28,13 +28,13 @@ async function retrieveChunks(query: string, topK = 3): Promise<string[]> {
     LIMIT ${topK}
   `);
 
-  //   console.log("Retrieved chunks:");
-  //   results.rows.forEach((row, i) => {
-  //     console.log(
-  //       `\nChunk ${i + 1} (similarity: ${Number(row.similarity).toFixed(4)}):`,
-  //     );
-  //     console.log(row.chunk_text);
-  //   });
+  // console.log("Retrieved chunks:");
+  // results.rows.forEach((row, i) => {
+  //   console.log(
+  //     `\nChunk ${i + 1} (similarity: ${Number(row.similarity).toFixed(4)}):`,
+  //   );
+  //   console.log(row.chunk_text);
+  // });
 
   return results.rows.map((row) => row.chunk_text as string);
 }
@@ -76,11 +76,11 @@ ${question}
   );
 
   const rawText = await response.text();
-  //   console.log("Status:", response.status);
-  //   console.log("Raw text:", rawText);
+  // console.log("Status:", response.status);
+  // console.log("Raw text:", rawText);
 
   if (!rawText) {
-    // console.error("Empty response from Gemini");
+    console.error("Empty response from Gemini");
     return "माफ गर्नुहोस्, जानकारी उपलब्ध छैन।";
   }
 
@@ -95,7 +95,7 @@ ${question}
 }
 
 export async function answerQuery(userQuery: string): Promise<string> {
-  //   console.log("\n🔍 User query:", userQuery);
+  console.log("\n🔍 User query:", userQuery);
 
   const chunks = await retrieveChunks(userQuery);
 
@@ -106,7 +106,7 @@ export async function answerQuery(userQuery: string): Promise<string> {
   const context = chunks.join("\n\n");
   const answer = await generateAnswer(context, userQuery);
 
-  //   console.log("\n✅ Answer:", answer);
+  // console.log("\n✅ Answer:", answer);
   return answer;
 }
 // (async () => {

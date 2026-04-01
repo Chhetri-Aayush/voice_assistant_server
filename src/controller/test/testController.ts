@@ -1,7 +1,7 @@
 import { Context } from "hono";
 
 export const testController = async (c: Context) => {
-  const url = "https://kadal-dipesh-hosting.hf.space/mt5_appointment";
+  const url = "";
 
   const payload = {
     text: "context: intent=CancelAppointment; doctor_name=डाक्टर सिता; department=Neurology; date=३० डिसेम्बर; time=२ बजे; status=available",

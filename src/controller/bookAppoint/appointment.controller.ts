@@ -75,18 +75,18 @@ export const appointmentController = upgradeWebSocket((c: Context) => {
           normalizedCtx = buildBookingContext(intResponse, nerResponse, id);
         }
 
-        console.log(
-          "the normalized ctx before sendign to the fsm is ",
-          normalizedCtx,
-        );
-        console.log("<-------------------->");
+        // console.log(
+        //   "the normalized ctx before sendign to the fsm is ",
+        //   normalizedCtx,
+        // );
+        // console.log("<-------------------->");
 
         const snapshot = actor.getSnapshot();
-        console.log(
-          "this is the snapshot right before we ennter the fsm ",
-          snapshot.value,
-        );
-        console.log("<-------------------->");
+        // console.log(
+        //   "this is the snapshot right before we ennter the fsm ",
+        //   snapshot.value,
+        // );
+        // console.log("<-------------------->");
         const intent = normalizedCtx.INTENT;
 
         if (snapshot.matches("idle")) {
@@ -158,11 +158,11 @@ export const appointmentController = upgradeWebSocket((c: Context) => {
         );
       }
       const snapshot = actor.getSnapshot();
-      console.log(
-        "this is the snapshot right after we leave the fsm ",
-        snapshot.value,
-      );
-      console.log("<-------------------->");
+      // console.log(
+      //   "this is the snapshot right after we leave the fsm ",
+      //   snapshot.value,
+      // );
+      // console.log("<-------------------->");
     },
 
     onClose: () => {

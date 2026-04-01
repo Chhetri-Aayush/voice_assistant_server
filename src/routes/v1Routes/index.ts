@@ -12,7 +12,7 @@ v1Routes.get("/hello", (c) => {
 
 v1Routes.get("/appointment", appointmentController);
 v1Routes.get("/bookedAppointments", bookedAppointmentController);
-v1Routes.get("/testing", testController);
-v1Routes.get("/testSocket", socketController);
+// v1Routes.get("/testing", testController);
+// v1Routes.get("/testSocket", socketController);
 
 export default v1Routes;
